@@ -183,11 +183,16 @@
 
         function isCurrentTimeInRange(startTimeStr, durationMinutes) {
             const now = new Date();
-            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            let currentMinutes = now.getHours() * 60 + now.getMinutes();
             const startMinutes = parseTime(startTimeStr);
             const endMinutes = startMinutes + durationMinutes;
-            
-            return currentMinutes >= startMinutes && currentMinutes < endMinutes;
+
+            // 處理跨天的情況
+            if (endMinutes > 24 * 60) {
+                return currentMinutes >= startMinutes || currentMinutes < endMinutes - 24 * 60;
+            } else {
+                return currentMinutes >= startMinutes && currentMinutes < endMinutes;
+            }
         }
 
         function updateScheduleTable() {
