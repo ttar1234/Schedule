@@ -111,7 +111,6 @@
             }
         }
 
-        /* 滾動條樣式 */
         ::-webkit-scrollbar {
             width: 10px;
             height: 10px;
@@ -154,36 +153,48 @@
 
     <script>
         const scheduleData = [
-            { time: "07:00 AM", activity: "Breakfast, Prepare and Plan" },
-            { time: "08:00 AM", activity: "Study (2 sessions: 25 mins study + 5 mins break)" },
-            { time: "09:00 AM", activity: "Work or Break" },
-            { time: "09:30 AM", activity: "Study (2 sessions)" },
-            { time: "10:30 AM", activity: "Work or Activity Time" },
-            { time: "11:00 AM", activity: "Study (2 sessions)" },
-            { time: "12:00 PM", activity: "Lunch and Break" },
-            { time: "01:00 PM", activity: "Study (2 sessions)" },
-            { time: "02:00 PM", activity: "Work or Activity Time" },
-            { time: "02:30 PM", activity: "Study (2 sessions)" },
-            { time: "03:30 PM", activity: "Work or Break" },
-            { time: "04:00 PM", activity: "Study (2 sessions)" },
-            { time: "05:00 PM", activity: "Free Time" },
-            { time: "06:00 PM", activity: "Dinner" },
-            { time: "07:00 PM", activity: "Relax, Cleanup" },
-            { time: "08:00 PM", activity: "Study (4 sessions)" },
-            { time: "09:30 PM", activity: "Self-study or Relax" },
-            { time: "11:00 PM", activity: "Sleep, Prepare for Next Day (7-8 hrs)" }
+            { time: "07:00 AM", activity: "Breakfast, Prepare and Plan", duration: 60 },
+            { time: "08:00 AM", activity: "Study (2 sessions: 25 mins study + 5 mins break)", duration: 60 },
+            { time: "09:00 AM", activity: "Work or Break", duration: 30 },
+            { time: "09:30 AM", activity: "Study (2 sessions)", duration: 60 },
+            { time: "10:30 AM", activity: "Work or Activity Time", duration: 30 },
+            { time: "11:00 AM", activity: "Study (2 sessions)", duration: 60 },
+            { time: "12:00 PM", activity: "Lunch and Break", duration: 60 },
+            { time: "01:00 PM", activity: "Study (2 sessions)", duration: 60 },
+            { time: "02:00 PM", activity: "Work or Activity Time", duration: 30 },
+            { time: "02:30 PM", activity: "Study (2 sessions)", duration: 60 },
+            { time: "03:30 PM", activity: "Work or Break", duration: 30 },
+            { time: "04:00 PM", activity: "Study (2 sessions)", duration: 60 },
+            { time: "05:00 PM", activity: "Free Time", duration: 60 },
+            { time: "06:00 PM", activity: "Dinner", duration: 60 },
+            { time: "07:00 PM", activity: "Relax, Cleanup", duration: 60 },
+            { time: "08:00 PM", activity: "Study (4 sessions)", duration: 90 },
+            { time: "09:30 PM", activity: "Self-study or Relax", duration: 90 },
+            { time: "11:00 PM", activity: "Sleep, Prepare for Next Day (7-8 hrs)", duration: 480 }
         ];
+
+        function parseTime(timeStr) {
+            const [time, period] = timeStr.split(' ');
+            let [hours, minutes] = time.split(':').map(Number);
+            if (period === 'PM' && hours !== 12) hours += 12;
+            if (period === 'AM' && hours === 12) hours = 0;
+            return hours * 60 + minutes;
+        }
+
+        function isCurrentTimeInRange(startTimeStr, durationMinutes) {
+            const now = new Date();
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            const startMinutes = parseTime(startTimeStr);
+            const endMinutes = startMinutes + durationMinutes;
+            
+            return currentMinutes >= startMinutes && currentMinutes < endMinutes;
+        }
 
         function updateScheduleTable() {
             const tbody = document.getElementById('scheduleBody');
-            const currentDate = new Date();
-            const currentHour = currentDate.getHours();
-            const isPM = currentHour >= 12;
-            const hour12 = currentHour > 12 ? currentHour - 12 : currentHour;
-            const currentTimeFormat = `${hour12.toString().padStart(2, '0')}:00 ${isPM ? 'PM' : 'AM'}`;
-
+            
             tbody.innerHTML = scheduleData.map(item => `
-                <tr class="${item.time === currentTimeFormat ? 'highlight' : ''}">
+                <tr class="${isCurrentTimeInRange(item.time, item.duration) ? 'highlight' : ''}">
                     <td>${item.time}</td>
                     <td>${item.activity}</td>
                 </tr>
